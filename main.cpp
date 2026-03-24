@@ -1,3 +1,10 @@
+/*
+ * Proyecto: THE MIND - Juego de Mesa Cooperativo
+ * Estructura de Datos - Trabajo Universitario
+ * Colaborador: [Yeison Lopez]
+ * Fecha: 23/03/2026
+ * Descripción: Punto de entrada principal para la lógica del juego.
+ */
 #include "Game.h"
 #include "Config.h"
 #include <iostream>
