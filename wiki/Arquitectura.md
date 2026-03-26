@@ -1,6 +1,6 @@
 # Arquitectura del Sistema
 
-El proyecto sigue una estructura orientada a objetos basada en el diagrama UML subido originalmente.
+El proyecto sigue una estructura orientada a objetos basada en el diagrama UML.
 
 ## Clases Principales
 - **Game**: Controlador principal que gestiona la máquina de estados.
