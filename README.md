@@ -79,6 +79,10 @@ TheMind/
     └── TheMind           -> Ejecutable compilado
 ```
 
+## Diagrama UML de Clases
+
+![Diagrama de clases UML - The Mind](assets/uml_diagram.png)
+
 ## Cambios realizados al diagrama UML original
 
 El diagrama UML original fue respetado en su estructura general. Los cambios menores
