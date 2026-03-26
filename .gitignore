@@ -1,0 +1,11 @@
+# Compilados y binarios
+*.exe
+*.o
+build/
+
+# Archivos de la IDE
+.vscode/
+
+# Partidas guardadas (Ignorar para no subirlas al repo original)
+autosave.txt
+26
