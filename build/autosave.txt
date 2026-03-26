@@ -1,0 +1,15 @@
+game_1
+3 2 2 1 2
+3 3 1 10 1
+0
+
+3
+p1 Jugador 1
+2
+30 78 
+p2 Jugador 2
+2
+36 48 
+p3 Jugador 3
+2
+79 90 
