@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <iostream>
+#include <fstream>
 #include <random>
 #include <algorithm>
 #include <sstream>
@@ -243,6 +244,9 @@ void Game::runInteractive() {
         std::cout << "\n  Manos de los jugadores:\n";
         printAllHands();
 
+        // Autoguardado del progreso actual para evitar pérdida
+        saveGame("autosave.txt");
+
         std::cout << "\n  Opciones:\n";
         for (int i = 0; i < static_cast<int>(players.size()); i++) {
             if (players[i].hasCards()) {
@@ -253,6 +257,7 @@ void Game::runInteractive() {
         if (stars.hasAny()) {
             std::cout << "    0. Usar una estrella (todos descartan su carta mas baja)\n";
         }
+        std::cout << "   -1. Guardar partida y salir\n";
 
         std::cout << "\n  Ingrese su eleccion: ";
         int choice;
@@ -263,7 +268,17 @@ void Game::runInteractive() {
             continue;
         }
 
-        if (choice == 0) {
+        if (choice == -1) {
+            std::cout << "  Ingrese nombre de archivo para guardar: ";
+            std::string fname;
+            std::cin >> fname;
+            if (saveGame(fname)) {
+                std::cout << "  Partida guardada exitosamente.\n";
+            } else {
+                std::cout << "  Error guardando partida.\n";
+            }
+            break;
+        } else if (choice == 0) {
             if (stars.hasAny()) {
                 useStar();
             } else {
@@ -393,4 +408,83 @@ void Game::runAutoSimulation() {
 
     std::cout << "\n";
     eventLog.printAll();
+}
+
+// ===================== Persistencia de Datos =====================
+
+bool Game::saveGame(const std::string& filename) const {
+    std::ofstream out(filename);
+    if (!out.is_open()) return false;
+
+    out << id << "\n";
+    out << currentSeed << " " << currentLevel.value << " " << lives.count << " " << stars.count << " " << static_cast<int>(state) << "\n";
+    out << config.maxPlayers << " " << config.startingLives << " " << config.startingStars << " " << config.maxLevel << " " << config.seed << "\n";
+    
+    out << currentRound.playedPile.size() << "\n";
+    for (const auto& c : currentRound.playedPile) {
+        out << c.number << " ";
+    }
+    out << "\n";
+
+    out << players.size() << "\n";
+    for (const auto& p : players) {
+        out << p.id << " " << p.name << "\n";
+        out << p.hand.cards.size() << "\n";
+        for (const auto& c : p.hand.cards) {
+            out << c.number << " ";
+        }
+        out << "\n";
+    }
+
+    out.close();
+    return true;
+}
+
+bool Game::loadGame(const std::string& filename) {
+    std::ifstream in(filename);
+    if (!in.is_open()) return false;
+
+    std::getline(in, id); // Empty if first line was just \n but let's assume valid ID
+    if (id.empty() || id == "\r") {
+        std::getline(in, id);
+    }
+    
+    int st;
+    in >> currentSeed >> currentLevel.value >> lives.count >> stars.count >> st;
+    state = static_cast<GameState>(st);
+
+    in >> config.maxPlayers >> config.startingLives >> config.startingStars >> config.maxLevel >> config.seed;
+
+    size_t pileSize;
+    in >> pileSize;
+    currentRound.playedPile.clear();
+    for (size_t i = 0; i < pileSize; ++i) {
+        int n;
+        in >> n;
+        currentRound.playedPile.push_back(Card(n));
+    }
+
+    size_t numPlayers;
+    in >> numPlayers;
+    players.clear();
+    for (size_t i = 0; i < numPlayers; ++i) {
+        std::string pid, pname;
+        in >> pid;
+        std::getline(in, pname); // consumimos resto y armamos string
+        if (!pname.empty() && pname[0] == ' ') pname = pname.substr(1);
+        Player p(pid, pname);
+
+        size_t handSize;
+        in >> handSize;
+        for (size_t j = 0; j < handSize; ++j) {
+            int n;
+            in >> n;
+            p.hand.cards.push_back(Card(n));
+        }
+        players.push_back(p);
+    }
+
+    in.close();
+    eventLog.record("Partida cargada desde " + filename);
+    return true;
 }

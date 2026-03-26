@@ -1,7 +1,7 @@
 /*
  * Proyecto: THE MIND - Juego de Mesa Cooperativo
  * Estructura de Datos - Trabajo Universitario
- * Colaborador: [Yeison Lopez]
+ * Colaborador: [Yeison Lopez y Sebastian Galiano]
  * Fecha: 23/03/2026
  * Descripción: Punto de entrada principal para la lógica del juego.
  */
@@ -101,18 +101,35 @@ int main() {
         std::cout << "    1. Ver reglas del juego\n";
         std::cout << "    2. Jugar en modo interactivo (tu decides quien juega)\n";
         std::cout << "    3. Ver simulacion automatica (la IA juega sola)\n";
-        std::cout << "    4. Salir\n";
+        std::cout << "    4. Cargar partida (puedes escribir 'autosave.txt')\n";
+        std::cout << "    5. Salir\n";
 
-        mainChoice = getValidInt("\n  Seleccione una opcion: ", 1, 4);
+        mainChoice = getValidInt("\n  Seleccione una opcion: ", 1, 5);
 
         if (mainChoice == 1) {
             printRules();
             continue;
         }
 
-        if (mainChoice == 4) {
+        if (mainChoice == 5) {
             std::cout << "\n  Gracias por jugar The Mind.\n\n";
             break;
+        }
+
+        if (mainChoice == 4) {
+            std::cout << "  Ingrese nombre de archivo a cargar: ";
+            std::string fname;
+            std::cin >> fname;
+            
+            Config dummyCfg(2, 0); // temp config
+            Game game(dummyCfg);
+            if (game.loadGame(fname)) {
+                std::cout << "  Partida cargada correctamente.\n";
+                game.runInteractive();
+            } else {
+                std::cout << "  Error al cargar la partida. El archivo no existe o es invalido.\n";
+            }
+            continue;
         }
 
         if (mainChoice == 2 || mainChoice == 3) {
@@ -144,7 +161,7 @@ int main() {
             std::cin.get();
         }
 
-    } while (mainChoice != 4);
+    } while (mainChoice != 5);
 
     return 0;
 }
