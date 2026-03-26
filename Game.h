@@ -44,6 +44,9 @@ public:
     bool endRoundIfComplete();
     bool advanceLevel();
 
+    bool saveGame(const std::string& filename) const;
+    bool loadGame(const std::string& filename);
+
     // Metodos auxiliares para el flujo del juego
     void runInteractive();
     void runAutoSimulation();

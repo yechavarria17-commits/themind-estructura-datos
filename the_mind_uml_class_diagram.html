@@ -1,0 +1,164 @@
+<div id="uml"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '12px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+  },
+});
+const { svg } = await mermaid.render('uml-svg', `classDiagram
+  direction TB
+
+  class Card {
+    +number: int
+    +operator<() bool
+    +operator>() bool
+    +operator==() bool
+  }
+
+  class Hand {
+    +cards: List~Card~
+    +size() int
+    +lowest() Card
+    +remove(card: Card) bool
+    +isEmpty() bool
+    +sortAscending() void
+    +hasCardLowerThan(card: Card) bool *
+    +removeAllLowerThan(card: Card) List~Card~ *
+  }
+
+  class Deck {
+    -cards: List~Card~
+    +shuffle(seed: int) void
+    +draw(n: int) List~Card~
+    +resetForLevel(level: int) void
+  }
+
+  class Player {
+    +id: string
+    +name: string
+    +hand: Hand
+    +receiveCards(cards: List~Card~) void
+    +playLowest() Card
+    +discardLowestToStar() Card
+    +peekLowest() Card *
+    +hasCards() bool *
+  }
+
+  class Level {
+    +value: int
+    +handSize() int
+    +getReward() RewardType *
+    +rewardDescription() string *
+  }
+
+  class Lives {
+    +count: int
+    +lose() void
+    +isDepleted() bool
+    +gain() void *
+  }
+
+  class Stars {
+    +count: int
+    +use() bool
+    +hasAny() bool
+    +gain() void *
+  }
+
+  class Round {
+    +playedPile: List~Card~
+    +isComplete(players: List~Player~) bool
+    +top() Card
+    +addCard(card: Card) void *
+    +clear() void *
+  }
+
+  class Config {
+    +maxPlayers: int = 4
+    +startingLives: int
+    +startingStars: int
+    +maxLevel: int
+    +seed: int
+  }
+
+  class RuleValidator {
+    +isLegalPlay(round: Round, card: Card) bool
+    +resolveIllegalPlay(game: Game, player: Player, card: Card) void
+    +canUseStar(game: Game) bool
+    +applyStar(game: Game) List~Card~
+  }
+
+  class EventLog {
+    +events: List~string~
+    +record(event: string) void
+  }
+
+  class GameState {
+    <<enumeration>>
+    SETUP
+    DEAL
+    IN_ROUND
+    ROUND_COMPLETE
+    LEVEL_COMPLETE
+    GAME_OVER
+  }
+
+  class Game {
+    +id: string
+    +start() void
+    +startLevel(n: int) void
+    +dealHands() void
+    +playCard(p: Player, c: Card) void
+    +useStar() bool
+    +endRoundIfComplete() bool
+    +advanceLevel() bool
+    +runInteractive() void *
+    +runAutoSimulation() void *
+  }
+
+  Game *-- Config : config
+  Game *-- "2..4" Player : jugadores
+  Game *-- Stars : stars
+  Game *-- Round : currentRound
+  Game *-- Level : level
+  Game *-- Lives : lives
+  Game *-- Deck : deck
+  Game *-- RuleValidator : ruleValidator
+  Game *-- EventLog : eventLog
+  Game --> GameState : state
+  Player *-- Hand : hand
+  Hand o-- "0..*" Card : cards
+  Deck o-- "0..*" Card : cards
+  Round o-- "0..*" Card : playedPile
+`);
+document.getElementById('uml').innerHTML = svg;
+document.querySelectorAll('#uml svg .node').forEach(node => {
+  const fp = node.querySelector('path[d]');
+  if (!fp) return;
+  const d = fp.getAttribute('d');
+  const nums = d.match(/-?[\\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (fp.hasAttribute(a)) rect.setAttribute(a, fp.getAttribute(a));
+  }
+  fp.replaceWith(rect);
+});
+</script>
